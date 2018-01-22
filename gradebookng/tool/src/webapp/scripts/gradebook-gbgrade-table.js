@@ -1143,6 +1143,21 @@ GbGradeTable.renderTable = function (elementId, tableData) {
     }
   })();
 
+  // Patch TouchScroll to not hide fixed headers on touch scroll
+  (function(){
+    Handsontable.plugins.TouchScroll.prototype.onBeforeTouchScroll = function() {
+      // NYU don't freeze overlays
+      // Handsontable.freezeOverlays = true;
+
+      // NYU don't add hide-tween CSS class
+      // for (var i = 0,
+      //     cloneCount = this.clones.length; i < cloneCount; i++) {
+      //   addClass(this.clones[i], 'hide-tween');
+      // }
+    };
+  })();
+
+
   GbGradeTable.runReadyCallbacks();
 };
 
