@@ -616,7 +616,7 @@ GbGradeTable.renderTable = function (elementId, tableData) {
   };
 
   GbGradeTable.calculateIdealWidth = function() {
-    return MorpheusViewportHelper.isPhone() || MorpheusViewportHelper.isTablet()) ? $("#pageBody").width() - 40 : $("#pageBody").width() - $("#toolMenuWrap").width() - 60;
+    return (MorpheusViewportHelper.isPhone() || MorpheusViewportHelper.isTablet()) ? $("#pageBody").width() - 40 : $("#pageBody").width() - $("#toolMenuWrap").width() - 60;
   };
 
   GbGradeTable.instance = new Handsontable(document.getElementById(elementId), {
@@ -762,23 +762,6 @@ GbGradeTable.renderTable = function (elementId, tableData) {
       } else if (coords.col < 0) {
         event.stopImmediatePropagation();
         self.selectCell(coords.row, GbGradeTable.STUDENT_COLUMN_INDEX);
-
-      // NYU Fix mobile touch to edit
-      } else if (event.type == 'touchstart') {
-        // Can we edit this cell?
-        if (GbGradeTable.instance.getCellMeta(coords.row, coords.col).readOnly != true) {
-          // Callback to edit the touched cell
-          function editCell() {
-            GbGradeTable.instance.selectCell(coords.row, coords.col);
-            GbGradeTable.instance.getActiveEditor().beginEditing();
-          };
-          // On touchend, edit!
-          $(window).one('touchend', editCell);
-          // But if touch becomes a move, cancel the touchend listener
-          $(window).one('touchmove', function() {
-            $(window).off('touchend', editCell);
-          });
-        }
       }
     },
     afterChange: function(changes, source) {
@@ -1078,6 +1061,7 @@ GbGradeTable.renderTable = function (elementId, tableData) {
   GbGradeTable.refreshSummaryLabels();
   GbGradeTable.setupDragAndDrop();
   GbGradeTable.setupConnectionPoll();
+  GbGradeTable.setupMobileTouchSupport();
 
   // Patch HandsonTable getWorkspaceWidth for improved scroll performance on big tables
   var origGetWorkspaceWidth = WalkontableViewport.prototype.getWorkspaceWidth;
@@ -3023,6 +3007,32 @@ GbGradeTable.findIndex = function(array, predicateFunction) {
     }
     return index;
 }
+
+
+GbGradeTable.setupMobileTouchSupport = function() {
+  var $current;
+
+  GbGradeTable.container.on('touchstart', '#gradeTable td', function(event) {
+    $current = this;
+  });
+
+  GbGradeTable.container.on('touchmove', '#gradeTable td', function(event) {
+    $current = null
+  });
+
+  GbGradeTable.container.on('touchend', '#gradeTable td', function(event) {
+    if ($current == this) {
+      var meta = $.data(this);
+      if (meta.assignmentid && meta.studentid) {
+        var col = GbGradeTable.colForAssignment(meta.assignmentid);
+        var row = GbGradeTable.rowForStudent(meta.studentid);
+        GbGradeTable.instance.selectCell(row, col);
+        GbGradeTable.instance.getActiveEditor().beginEditing();
+      }
+    }
+    $current = null;
+  });
+};
 
 /**************************************************************************************
  * GradebookAPI - all the GradebookNG entity provider calls in one happy place
