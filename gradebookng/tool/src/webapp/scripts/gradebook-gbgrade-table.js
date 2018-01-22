@@ -762,6 +762,23 @@ GbGradeTable.renderTable = function (elementId, tableData) {
       } else if (coords.col < 0) {
         event.stopImmediatePropagation();
         self.selectCell(coords.row, GbGradeTable.STUDENT_COLUMN_INDEX);
+
+      // NYU Fix mobile touch to edit
+      } else if (event.type == 'touchstart') {
+        // Can we edit this cell?
+        if (GbGradeTable.instance.getCellMeta(coords.row, coords.col).readOnly != true) {
+          // Callback to edit the touched cell
+          function editCell() {
+            GbGradeTable.instance.selectCell(coords.row, coords.col);
+            GbGradeTable.instance.getActiveEditor().beginEditing();
+          };
+          // On touchend, edit!
+          $(window).one('touchend', editCell);
+          // But if touch becomes a move, cancel the touchend listener
+          $(window).one('touchmove', function() {
+            $(window).off('touchend', editCell);
+          });
+        }
       }
     },
     afterChange: function(changes, source) {
