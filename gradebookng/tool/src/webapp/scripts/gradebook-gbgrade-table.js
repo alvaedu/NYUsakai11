@@ -616,7 +616,7 @@ GbGradeTable.renderTable = function (elementId, tableData) {
   };
 
   GbGradeTable.calculateIdealWidth = function() {
-    return MorpheusViewportHelper.isPhone() ? $("#pageBody").width() - 40 : $("#pageBody").width() - $("#toolMenuWrap").width() - 60;
+    return MorpheusViewportHelper.isPhone() || MorpheusViewportHelper.isTablet()) ? $("#pageBody").width() - 40 : $("#pageBody").width() - $("#toolMenuWrap").width() - 60;
   };
 
   GbGradeTable.instance = new Handsontable(document.getElementById(elementId), {
