@@ -621,7 +621,7 @@ GbGradeTable.renderTable = function (elementId, tableData) {
 
   GbGradeTable.instance = new Handsontable(document.getElementById(elementId), {
     data: GbGradeTable.getFilteredData(),
-    fixedColumnsLeft: 2,
+    fixedColumnsLeft: MorpheusViewportHelper.isPhone() ? 0 : 2,
     colHeaders: true,
     columns: GbGradeTable.getFilteredColumns(),
     colWidths: GbGradeTable.getColumnWidths(),

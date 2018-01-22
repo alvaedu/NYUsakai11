@@ -48,7 +48,9 @@ $PBJQ(document).ready(function(){
 // Viewport Helpers - used to better determine the current breakpoint
 var MorpheusViewportHelper = {
     isPhone: function() {
-        return $PBJQ('#Mrphs-viewport-helpers .phone').is(':visible');
+        // NYU as we don't have a $phone breakpoint, we need to hardcode this value
+        //return $PBJQ('#Mrphs-viewport-helpers .phone').is(':visible');
+        return $PBJQ(window).width() <= 770;
     },
     isTablet: function() {
         return $PBJQ('#Mrphs-viewport-helpers .tablet').is(':visible');
