@@ -50,7 +50,7 @@ var MorpheusViewportHelper = {
     isPhone: function() {
         // NYU as we don't have a $phone breakpoint, we need to hardcode this value
         //return $PBJQ('#Mrphs-viewport-helpers .phone').is(':visible');
-        return $PBJQ(window).width() <= 770;
+        return $PBJQ(window).width() <= 700;
     },
     isTablet: function() {
         return $PBJQ('#Mrphs-viewport-helpers .tablet').is(':visible');
