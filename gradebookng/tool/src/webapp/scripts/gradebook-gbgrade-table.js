@@ -1119,6 +1119,29 @@ GbGradeTable.renderTable = function (elementId, tableData) {
     }
   }());
 
+  // Patch WalkontableOverlays.prototype.onTableScroll to support mobile/touch devices
+  (function() {
+    WalkontableOverlays.prototype.onTableScroll = function(event) {
+//    NYU disables this 'return'
+//    if (isMobileBrowser()) {
+//      return;
+//    }
+      var masterHorizontal = this.leftOverlay.mainTableScrollableElement;
+      var masterVertical = this.topOverlay.mainTableScrollableElement;
+      var target = event.target;
+      if (this.keyPressed) {
+        if ((masterVertical !== window && target !== window && !event.target.contains(masterVertical)) || (masterHorizontal !== window && target !== window && !event.target.contains(masterHorizontal))) {
+          return;
+        }
+      }
+      if (event.type === 'scroll') {
+        this.syncScrollPositions(event);
+      } else {
+        this.translateMouseWheelToScroll(event);
+      }
+    }
+  })();
+
   GbGradeTable.runReadyCallbacks();
 };
 
