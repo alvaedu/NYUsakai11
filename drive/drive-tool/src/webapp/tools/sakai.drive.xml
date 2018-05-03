@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <registration>
     <tool id="sakai.drive"
-          title="Drive"
-          description="For managing resources">
+          title="Course Materials"
+          description="For managing your course materials">
 
         <!--  This tool will be made available to the following site types via Site Info > Edit Tools -->
         <category name="course"/>
