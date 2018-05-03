@@ -7,6 +7,7 @@ var SakaiDrive = function(baseURL, collectionId) {
   this.setupDragAndDrop();
   this.setupContextMenu();
   this.setupFolderTree();
+  this.ajaxLinkHandler();
 };
 
 SakaiDrive.prototype.setupPreviewer = function() {
@@ -624,4 +625,59 @@ GoogleDriveModal.prototype.setupTabs = function() {
           });
        }
     });
+};
+
+
+if (!window.sakai_drive) {
+  window.sakai_drive = {};
+}
+
+SakaiDrive.prototype.ajaxLinkHandler = function() {
+  var self = this;
+
+  var reload_pane = function(href, skip_push) {
+    if (!skip_push) {
+      window.history.pushState({'href': href}, "", href);
+    }
+
+    $.ajax(href,
+           {
+             type: "GET",
+             contentType: "html",
+             data: { 'inline': 'true' },
+             cache: false,
+           }).success(function (content) {
+             $('div.sakai-resources').replaceWith(content);
+           }).error(function () {
+             console.log("FAIL");
+             window.location.href = href;
+           });
+  }
+
+  var clickHandler = function (e) {
+    var $link = $(this);
+
+    if (!$link.data('path')) {
+      return true;
+    }
+
+    e.preventDefault();
+    reload_pane($link.attr('href'));
+    return false;
+  };
+
+  var popstateHandler = function (e) {
+    reload_pane(window.location.href, true);
+  }
+
+  /* FIXME: sux */
+  if (!window.sakai_drive.clickhandler_registered) {
+    window.sakai_drive.clickhandler_registered = true;
+    $(document).on('click', 'a', clickHandler);
+  }
+
+  if (!window.sakai_drive.popstate_registered) {
+    window.sakai_drive.popstate_registered = true;
+    $(window).on('popstate', popstateHandler);
+  }
 };

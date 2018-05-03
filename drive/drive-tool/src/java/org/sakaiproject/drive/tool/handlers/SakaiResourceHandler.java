@@ -90,7 +90,13 @@ public class SakaiResourceHandler implements Handler {
 
             context.put("resource", new ResourceTree(siteResources, contentHostingService));
             context.put("collectionId", siteResources.getId());
-            context.put("subpage", "resources");
+
+            if ("true".equals(request.getParameter("inline"))) {
+                context.put("layout", "false");
+                context.put("subpage", "sakai_resources");
+            } else {
+                context.put("subpage", "resources");
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
