@@ -48,8 +48,6 @@ import org.sakaiproject.util.BaseResourcePropertiesEdit;
 
 public class MoveHandler implements Handler {
 
-    private String redirectTo = null;
-
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, Map<String, Object> context) {
         try {
@@ -67,20 +65,17 @@ public class MoveHandler implements Handler {
                 }
                 chs.moveIntoFolder(source, target);
             }
-
-            // Redirect to the target
-            redirectTo = context.get("baseURL") + "sakai-resources" + target;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public boolean hasRedirect() {
-        return (redirectTo != null);
+        return false;
     }
 
     public String getRedirect() {
-        return redirectTo;
+        return null;
     }
 
     public Errors getErrors() {
