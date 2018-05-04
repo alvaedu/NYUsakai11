@@ -48,12 +48,14 @@ import org.sakaiproject.util.BaseResourcePropertiesEdit;
 
 public class MoveHandler implements Handler {
 
+    private boolean inlineTargetListing = false;
+
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, Map<String, Object> context) {
         try {
             String[] sources = request.getParameterValues("source[]");
             String target = request.getParameter("target");
-            
+
             ContentHostingService chs = (ContentHostingService) ComponentManager.get("org.sakaiproject.content.api.ContentHostingService");
 
             // FIXME: sanity checking?
@@ -66,16 +68,30 @@ public class MoveHandler implements Handler {
                 chs.moveIntoFolder(source, target);
             }
 
-            context.put("layout", "false");
-            context.put("subpage", "plaintext");
-            context.put("plaintext_content", "OK");
+            if ("true".equals(request.getParameter("inline_target_listing"))) {
+                // If the caller asks, we can send back the listing for the
+                // folder containing the moved file(s).  Saves a second request
+                // to fetch it.
+                inlineTargetListing = true;
+                new SakaiResourceHandler().prepareListing(context, target, true);
+            } else {
+                context.put("layout", "false");
+                context.put("subpage", "plaintext");
+                context.put("plaintext_content", "OK");
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public String getContentType() {
-        return "text/plain";
+        if (inlineTargetListing) {
+            // We'll return the target folder's list view
+            return "text/html";
+        } else {
+            return "text/plain";
+        }
     }
 
     public boolean hasRedirect() {

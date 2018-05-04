@@ -100,9 +100,9 @@ public class DriveServlet extends HttpServlet {
 
             Handler handler = handlerForRequest(request);
 
-            response.setHeader("Content-Type", handler.getContentType());
-
             handler.handle(request, response, context);
+
+            response.setHeader("Content-Type", handler.getContentType());
 
             if (handler.hasRedirect()) {
                 if (handler.getRedirect().startsWith("http")) {

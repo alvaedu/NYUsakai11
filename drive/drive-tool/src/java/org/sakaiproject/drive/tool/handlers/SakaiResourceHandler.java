@@ -84,6 +84,10 @@ public class SakaiResourceHandler implements Handler {
             requestedPath += "/";
         }
 
+        prepareListing(context, requestedPath, "true".equals(request.getParameter("inline")));
+    }
+
+    public void prepareListing(Map<String, Object> context, String requestedPath, boolean inline) {
         try {
             // THINKME: Maybe context should be smrter!
             ContentCollection siteResources = contentHostingService.getCollection(requestedPath);
@@ -91,7 +95,7 @@ public class SakaiResourceHandler implements Handler {
             context.put("resource", new ResourceTree(siteResources, contentHostingService));
             context.put("collectionId", siteResources.getId());
 
-            if ("true".equals(request.getParameter("inline"))) {
+            if (inline) {
                 context.put("layout", "false");
                 context.put("subpage", "sakai_resources");
             } else {

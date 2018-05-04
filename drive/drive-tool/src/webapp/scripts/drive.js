@@ -128,12 +128,12 @@ SakaiDrive.prototype.doMove = function(target) {
            {
                type: "POST",
                data: {
+                   'inline_target_listing': true,
                    'source[]': sources,
                    target: target_uri,
                }
            }).success(function (content, status, xhr) {
-               /* FIXME: hard-coding sakai-resources here... */
-               self.reloadPane(self.baseURL + 'sakai-resources' + target_uri);
+               self.reloadPane(self.baseURL + 'sakai-resources' + target_uri, {}, content);
            });
 };
 
@@ -637,23 +637,32 @@ if (!window.sakai_drive) {
   window.sakai_drive = {};
 }
 
-SakaiDrive.prototype.reloadPane = function(href, skip_push) {
-    if (!skip_push) {
+SakaiDrive.prototype.reloadPane = function(href, opts, content) {
+    if (!opts) {
+        opts = {};
+    }
+
+    if (!opts.skip_push) {
         window.history.pushState({'href': href}, "", href);
     }
 
-    $.ajax(href,
-           {
-               type: "GET",
-               contentType: "html",
-               data: { 'inline': 'true' },
-               cache: false,
-           }).success(function (content) {
-               $('div.sakai-resources').replaceWith(content);
-           }).error(function () {
-               console.log("FAIL");
-               window.location.href = href;
-           });
+    if (content) {
+        /* No need to fetch anything... */
+        $('div.sakai-resources').replaceWith(content);
+    } else {
+        $.ajax(href,
+               {
+                   type: "GET",
+                   contentType: "html",
+                   data: { 'inline': 'true' },
+                   cache: false,
+               }).success(function (content) {
+                   $('div.sakai-resources').replaceWith(content);
+               }).error(function () {
+                   console.log("FAIL");
+                   window.location.href = href;
+               });
+    }
 };
 
 SakaiDrive.prototype.ajaxLinkHandler = function() {
@@ -672,7 +681,7 @@ SakaiDrive.prototype.ajaxLinkHandler = function() {
   };
 
   var popstateHandler = function (e) {
-    self.reloadPane(window.location.href, true);
+    self.reloadPane(window.location.href, { skip_push: true });
   }
 
   /* FIXME: sux */
