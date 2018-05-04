@@ -66,9 +66,9 @@ public class MoveHandler implements Handler {
                 chs.moveIntoFolder(source, target);
             }
 
-            // THINKME: more convenient way to return a simple string?
             context.put("layout", "false");
-            context.put("subpage", "move_ok");
+            context.put("subpage", "plaintext");
+            context.put("plaintext_content", "OK");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
