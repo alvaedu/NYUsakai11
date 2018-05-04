@@ -252,7 +252,45 @@ body.sakai-drive-preview-open {
 .sakai-resources-tree li {
   white-space: nowrap;
 }
-
 .sakai-resources-tree li.active > .drive-folder {
   font-weight: bold;
 }
+.sakai-resources-tree .drive-folder:before {
+  display: none;
+}
+.sakai-resources-tree .drive-folder-toggle {
+  position: relative;
+}
+.sakai-resources-tree .drive-folder-toggle:before {
+  font-family: 'FontAwesome';
+  content: '\f07b';
+  color: #777;
+  width: 20px;
+  display: inline-block;
+}
+.sakai-resources-tree li.has-children > .drive-folder > .drive-folder-toggle:after {
+  font-family: 'FontAwesome';
+  content: '\f067';
+  color: #FFF;
+  text-decoration: none;
+  position: absolute;
+  font-size: 6px;
+  left: 4px;
+  top: 5px;
+  text-shadow: 0px 0px 1px #333;
+}
+.sakai-resources-tree .expanded > .drive-folder > .drive-folder-toggle:before {
+  content: '\f07c';
+}
+.sakai-resources-tree .expanded.has-children > .drive-folder > .drive-folder-toggle:after {
+  display: none;
+}
+.sakai-resources-tree ul {
+  display: none;
+}
+.sakai-resources-tree .expanded > ul {
+  display: block;
+}
+
+
+

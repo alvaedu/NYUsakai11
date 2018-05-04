@@ -188,6 +188,7 @@ SakaiDrive.prototype.setupDragAndDrop = function() {
 SakaiDrive.prototype.addDroppables = function($droppables) {
     var self = this;
 
+    var autoExpandTimeout;
     $droppables.addClass('sakai-resource-dropzone');
     $droppables.droppable({
         accept: function(draggable) {
@@ -198,6 +199,23 @@ SakaiDrive.prototype.addDroppables = function($droppables) {
             self.doMove(event.target);
         },
         tolerance: 'pointer',
+        over: function(event, ui) {
+            // auto expand folder after 1s
+            var $droppable = $(event.target).closest('.sakai-resource-dropzone');
+            if ($droppable.closest('.sakai-resources-tree').length == 1) {
+                if ($droppable.parent().is('.has-children:not(.expanded)')) {
+                    autoExpandTimeout = setTimeout(function() {
+                       $droppable.parent().find('.drive-folder-toggle').trigger('click')
+                    }, 1000);
+                }
+            }
+        },
+        out: function(event, ui) {
+            if (autoExpandTimeout != null) {
+                clearTimeout(autoExpandTimeout);
+                autoExpandTimeout = null;
+            }
+        }
     });
 }
 
@@ -261,6 +279,7 @@ SakaiDrive.prototype.setupFolderTree = function() {
     }
 
     if (folder.children.length > 0) {
+      $li.addClass('has-children');
       var $ul = $('<ul>');
       $.each(folder.children, function() {
         renderFolder(this, $ul);
@@ -272,6 +291,16 @@ SakaiDrive.prototype.setupFolderTree = function() {
   $.getJSON(baseURL+'/folder-tree', function(root) {
     renderFolder(root, $('.sakai-resources-tree'));
     self.addDroppables($('.sakai-resources-tree .drive-folder'));
+
+    $('.sakai-resources-tree li.active').each(function() {
+      $(this).addClass('expanded');
+      $(this).parentsUntil('.sakai-resources-tree', 'li').addClass('expanded');
+    });
+
+    // TODO store toggle state in browser store so remembered upon refresh? 
+    $('.sakai-resources-tree').on('click', 'li.has-children > .drive-folder > .drive-folder-toggle', function() {
+      $(this).closest('li').toggleClass('expanded');
+    });
   });
 };
 
