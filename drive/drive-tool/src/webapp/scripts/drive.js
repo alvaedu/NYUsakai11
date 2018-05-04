@@ -116,20 +116,25 @@ SakaiDrive.prototype.setupRow = function() {
 };
 
 SakaiDrive.prototype.doMove = function(target) {
-    var $form = $('form#move-form');
-    $form.empty();
+    var self = this;
 
-    $.each($('.sakai-resources-table tbody tr.active'), function() {
-        var $sourceInput = $('<input type="hidden" name="source[]">');
-        $sourceInput.val($(this).find('[data-path]').data('path'));
-        $form.append($sourceInput);
-    });
+    var sources = $('.sakai-resources-table tbody tr.active').map(function() {
+        return $(this).find('[data-path]').data('path');
+    }).toArray();
 
-    var $targetInput = $('<input type="hidden" name="target">');
-    $targetInput.val($(target).find('[data-path]').data('path'));
-    $form.append($targetInput);
+    var target_uri = $(target).find('[data-path]').data('path');
 
-    $form.submit();
+    $.ajax(baseURL + "move",
+           {
+               type: "POST",
+               data: {
+                   'source[]': sources,
+                   target: target_uri,
+               }
+           }).success(function (content, status, xhr) {
+               /* FIXME: hard-coding sakai-resources here... */
+               self.reloadPane(self.baseURL + 'sakai-resources' + target_uri);
+           });
 };
 
 
@@ -632,27 +637,27 @@ if (!window.sakai_drive) {
   window.sakai_drive = {};
 }
 
-SakaiDrive.prototype.ajaxLinkHandler = function() {
-  var self = this;
-
-  var reload_pane = function(href, skip_push) {
+SakaiDrive.prototype.reloadPane = function(href, skip_push) {
     if (!skip_push) {
-      window.history.pushState({'href': href}, "", href);
+        window.history.pushState({'href': href}, "", href);
     }
 
     $.ajax(href,
            {
-             type: "GET",
-             contentType: "html",
-             data: { 'inline': 'true' },
-             cache: false,
+               type: "GET",
+               contentType: "html",
+               data: { 'inline': 'true' },
+               cache: false,
            }).success(function (content) {
-             $('div.sakai-resources').replaceWith(content);
+               $('div.sakai-resources').replaceWith(content);
            }).error(function () {
-             console.log("FAIL");
-             window.location.href = href;
+               console.log("FAIL");
+               window.location.href = href;
            });
-  }
+};
+
+SakaiDrive.prototype.ajaxLinkHandler = function() {
+  var self = this;
 
   var clickHandler = function (e) {
     var $link = $(this);
@@ -662,12 +667,12 @@ SakaiDrive.prototype.ajaxLinkHandler = function() {
     }
 
     e.preventDefault();
-    reload_pane($link.attr('href'));
+    self.reloadPane($link.attr('href'));
     return false;
   };
 
   var popstateHandler = function (e) {
-    reload_pane(window.location.href, true);
+    self.reloadPane(window.location.href, true);
   }
 
   /* FIXME: sux */
