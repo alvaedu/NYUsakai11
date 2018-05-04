@@ -65,9 +65,17 @@ public class MoveHandler implements Handler {
                 }
                 chs.moveIntoFolder(source, target);
             }
+
+            // THINKME: more convenient way to return a simple string?
+            context.put("layout", "false");
+            context.put("subpage", "move_ok");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getContentType() {
+        return "text/plain";
     }
 
     public boolean hasRedirect() {
@@ -87,7 +95,7 @@ public class MoveHandler implements Handler {
     }
 
     public boolean hasTemplate() {
-        return false;
+        return true;
     }
 
 }
