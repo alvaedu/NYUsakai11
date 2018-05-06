@@ -146,6 +146,7 @@ SakaiDrive.prototype.setupDragAndDrop = function() {
 
     $('.sakai-resource-draggable').draggable({
         opacity: 0.8,
+        refreshPositions: true,
         helper: function(event) {
             var $active = $('.sakai-resources-table tbody tr.active');
             var $helper = $('<div>');
@@ -204,6 +205,7 @@ SakaiDrive.prototype.addDroppables = function($droppables) {
             var $droppable = $(event.target).closest('.sakai-resource-dropzone');
             if ($droppable.closest('.sakai-resources-tree').length == 1) {
                 if ($droppable.parent().is('.has-children:not(.expanded)')) {
+                    self._currentlyHoverExpanding = $droppable;
                     autoExpandTimeout = setTimeout(function() {
                        $droppable.parent().find('.drive-folder-toggle').trigger('click')
                     }, 1000);
@@ -211,10 +213,14 @@ SakaiDrive.prototype.addDroppables = function($droppables) {
             }
         },
         out: function(event, ui) {
-            if (autoExpandTimeout != null) {
-                clearTimeout(autoExpandTimeout);
-                autoExpandTimeout = null;
+            var $droppable = $(event.target).closest('.sakai-resource-dropzone');
+            if (self._currentlyHoverExpanding == $droppable) {
+                if (autoExpandTimeout != null) {
+                    clearTimeout(autoExpandTimeout);
+                    autoExpandTimeout = null;
+                }
             }
+            self._currentlyHoverExpanding = undefined;
         }
     });
 }
