@@ -237,6 +237,18 @@ body.sakai-drive-preview-open {
   border-left: 1px solid #AAA;
 }
 
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+#google-drive-modal .loading {
+  animation: spinner 1s linear infinite;
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  margin-top: -7px;
+  color: #999;
+}
+
 .sakai-resources-tree {
   overflow: hidden;
 }
@@ -291,6 +303,3 @@ body.sakai-drive-preview-open {
 .sakai-resources-tree .expanded > ul {
   display: block;
 }
-
-
-

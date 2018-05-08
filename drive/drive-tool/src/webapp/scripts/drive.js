@@ -313,7 +313,7 @@ SakaiDrive.prototype.setupFolderTree = function() {
 SakaiDrive.prototype.VIEW_URL = '/drive-tool/pdfjs/web/viewer.html?file=';
 
 
-function GoogleDrive(rootElt, baseURL, options) {
+function GoogleDrive(rootElt, baseURL, options, onLoading, onLoaded) {
   this.root = rootElt;
   this.baseURL = baseURL;
   this.options = options;
@@ -333,6 +333,9 @@ function GoogleDrive(rootElt, baseURL, options) {
 
   this.search = this.root.find('.file-search');
   this.setupSearch();
+
+  this.onLoading = onLoading || $.noop;
+  this.onLoaded = onLoaded || $.noop;
 
   this.getFiles();
 };
@@ -484,6 +487,8 @@ GoogleDrive.prototype.getFiles = function(pageToken, options) {
 
   self._currentPageData = $.extend({}, data, options.data);
 
+  self.onLoading();
+
   $.getJSON(this.baseURL + this.options.path,
             self._currentPageData,
             function(json) {
@@ -505,6 +510,8 @@ GoogleDrive.prototype.getFiles = function(pageToken, options) {
               }
 
               options.complete();
+
+              self.onLoaded();
             });
 };
 
@@ -583,24 +590,28 @@ GoogleDriveModal.prototype.setupTabs = function() {
     // bootstap tabs please
     self.$modal.find('.google-drive-menu').tab();
 
+    self._currentTab = 'googledriverecent';
+
     // Recent/Search
     self.recentDrive = new GoogleDrive(self.$modal.find('#googledriverecent'), baseURL, {
       path: '/drive-data',
-    });
+    }, $.proxy(self.onLoading, self), $.proxy(self.onLoaded, self));
 
     self.$modal.find('.google-drive-menu a[href="#googledriverecent"]').on('show.bs.tab', function() {
-      // nothing at the moment
+        self._currentTab = 'googledriverecent';
     });
 
     // My Drive
     self.myDrive = null;
     self.$modal.find('.google-drive-menu a[href="#googledrivehome"]').on('show.bs.tab', function() {
-      // load the drive home
+        self._currentTab = 'googledrivehome';
+
+        // load the drive home
         if (self.myDrive == null) {
           // load my drive (for root context)
           self.myDrive = new GoogleDrive($('#googledrivehome'), baseURL, {
             path: '/my-drive-data',
-          });
+          }, $.proxy(self.onLoading, self), $.proxy(self.onLoaded, self));
 
 
           $("#googledrivehome").on('click', '.google-drive-folder, .breadcrumb a', function() {
@@ -632,12 +643,14 @@ GoogleDriveModal.prototype.setupTabs = function() {
     // Starred
     self.starredDrive = null;
     self.$modal.find('.google-drive-menu a[href="#googledrivestarred"]').on('show.bs.tab', function() {
-      // load the drive home
+        self._currentTab = 'googledrivestarred';
+
+        // load the drive home
         if (self.starredDrive == null) {
           // load my drive (for root context)
           self.starredDrive = new GoogleDrive($('#googledrivestarred'), baseURL, {
             path: '/starred-drive-data',
-          });
+          }, $.proxy(self.onLoading, self), $.proxy(self.onLoaded, self));
 
 
           $("#googledrivestarred").on('click', '.google-drive-folder, .breadcrumb a', function() {
@@ -666,6 +679,18 @@ GoogleDriveModal.prototype.setupTabs = function() {
        }
     });
 };
+
+GoogleDriveModal.prototype.onLoading = function() {
+  this._spinner = $('<i class="loading fa fa-circle-o-notch" aria-hidden="true"></i>');
+  this.$modal.find('.google-drive-menu a[href="#'+this._currentTab+'"]').after(this._spinner);
+}
+
+GoogleDriveModal.prototype.onLoaded = function() {
+  if (this._spinner) {
+    this._spinner.remove();
+    this._spinner = undefined;
+  }
+}
 
 
 if (!window.sakai_drive) {
