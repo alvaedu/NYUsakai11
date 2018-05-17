@@ -159,6 +159,8 @@ public class DriveServlet extends HttpServlet {
             return new AddFolderHandler();
         } else if (path.startsWith("/folder-tree")) {
             return new FolderTreeHandler();
+        } else if (path.startsWith("/trash")) {
+            return new ViewTrashHandler();
         }
 
         return new SakaiResourceHandler();

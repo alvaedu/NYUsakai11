@@ -64,7 +64,7 @@ public class SakaiResourceHandler implements Handler {
 
     ContentHostingService contentHostingService = (ContentHostingService) ComponentManager.get("org.sakaiproject.content.api.ContentHostingService");
 
-    private String redirectTo = null;
+    protected String redirectTo = null;
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, Map<String, Object> context) {
@@ -123,7 +123,7 @@ public class SakaiResourceHandler implements Handler {
         return "";
     }
 
-    private interface Resource {
+    protected interface Resource {
         public String getLabel();
         public boolean isFolder();
         public Collection<Resource> getChildren();
@@ -136,7 +136,7 @@ public class SakaiResourceHandler implements Handler {
         public String getAccessSummary();
     }
 
-    private class ResourceTree implements Resource {
+    protected class ResourceTree implements Resource {
         private ContentCollection root;
         private ContentHostingService contentHostingService;
         private ResourceProperties properties;
@@ -249,7 +249,7 @@ public class SakaiResourceHandler implements Handler {
         }
     }
 
-    private static class Breadcrumb {
+    protected static class Breadcrumb {
         private String id;
         private String label;
 
@@ -262,7 +262,7 @@ public class SakaiResourceHandler implements Handler {
         public String getLabel() { return label; }
     }
 
-    private class ResourceItem implements Resource {
+    protected class ResourceItem implements Resource {
         private ContentResource resource;
         private ContentTypeImageService contentTypeImageService;
         private ResourceProperties properties;
