@@ -214,7 +214,7 @@ SakaiDrive.prototype.addDroppables = function($droppables) {
         },
         out: function(event, ui) {
             var $droppable = $(event.target).closest('.sakai-resource-dropzone');
-            if (self._currentlyHoverExpanding == $droppable) {
+            if (self._currentlyHoverExpanding.is($droppable)) {
                 if (autoExpandTimeout != null) {
                     clearTimeout(autoExpandTimeout);
                     autoExpandTimeout = null;
