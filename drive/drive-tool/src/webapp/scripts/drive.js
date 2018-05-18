@@ -226,7 +226,7 @@ SakaiDrive.prototype.addDroppables = function($droppables) {
 }
 
 
-SakaiDrive.prototype.restoreResource = function(id) {
+SakaiDrive.prototype.restoreResources = function(ids) {
     var self = this;
 
     $.ajax(baseURL + "restore",
@@ -234,11 +234,26 @@ SakaiDrive.prototype.restoreResource = function(id) {
                type: "POST",
                data: {
                    'inline_target_listing': true,
-                   'resource[]': [id],
+                   'resource[]': ids,
                }
            }).success(function (content, status, xhr) {
                self.reloadPane(self.baseURL + 'trash');
            });
+};
+
+SakaiDrive.prototype.trashResources = function(ids) {
+    var self = this;
+
+    $.ajax(baseURL + "movetotrash",
+          {
+              type: "POST",
+              data: {
+                  'inline_target_listing': true,
+                  'resource[]': ids,
+              }
+          }).success(function (content, status, xhr) {
+              self.reloadPane(self.baseURL + 'trash');
+          });
 };
 
 
@@ -273,11 +288,16 @@ SakaiDrive.prototype.setupContextMenu = function() {
                 var $selectedMenu = $(e.target);
 
                 if ($selectedMenu.is('.sakai-drive-context-menu-open')) {
-                  $target.closest('tr').find('td.name a')[0].click();
+                    $target.closest('tr').find('td.name a')[0].click();
                 } else if ($selectedMenu.is('.sakai-drive-context-menu-restore')) {
-                  self.restoreResource($target.closest('tr').find('td.name a').data('path'));
+                    // FIXME support multiple rows selected
+                    self.restoreResources([$target.closest('tr').find('td.name a').data('path')]);
+                } else if ($selectedMenu.is('.sakai-drive-context-menu-trash')) {
+                    // FIXME support multiple rows selected
+                    // FIXME add confirmation dialog
+                    self.trashResources([$target.closest('tr').find('td.name a').data('path')]);
                 } else {
-                  alert('TODO :)');
+                    alert('TODO :)');
                 }
 
                 $menu.remove();
