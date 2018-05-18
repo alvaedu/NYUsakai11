@@ -30,6 +30,9 @@ import org.sakaiproject.content.api.GroupAwareEntity.AccessMode;
 import org.sakaiproject.entity.api.EntityPropertyNotDefinedException;
 import org.sakaiproject.entity.api.EntityPropertyTypeException;
 import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.PermissionException;
+import org.sakaiproject.exception.TypeException;
 import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.user.cover.UserDirectoryService;
@@ -79,29 +82,13 @@ public class ViewTrashHandler extends SakaiResourceHandler {
         return "";
     }
 
-    private class Trash implements Resource {
-        private ContentCollection root;
-        private ContentHostingService contentHostingService;
-        private ResourceProperties properties;
+    private class Trash extends ResourceTree {
 
         public Trash(ContentCollection root, ContentHostingService contentHostingService) {
-            this.root = root;
-            this.properties = root.getProperties();
-            this.contentHostingService = contentHostingService;
+            super(root, contentHostingService);
         }
 
-        public boolean isFolder() {
-            return true;
-        }
-
-        public String getTypeClass() {
-            return "trash";
-        }
-
-        public String getPath() {
-            return "trash";
-        }
-
+        @Override
         public Collection<Resource> getChildren() {
             Collection<Resource> result = new ArrayList<>();
 
@@ -110,15 +97,16 @@ public class ViewTrashHandler extends SakaiResourceHandler {
 
             for (ContentEntity entity : children) {
                 if (entity.isCollection()) {
-                    result.add(new ResourceTree((ContentCollection) entity, contentHostingService));
+                    throw new RuntimeException("No collections please");
                 } else {
-                    result.add(new ResourceItem((ContentResource) entity));
+                    result.add(new TrashItem((ContentResource) entity));
                 }
             }
 
             return result;
         }
 
+        @Override
         public List<Breadcrumb> getBreadcrumbs() {
             List<Breadcrumb> result = new ArrayList<>();
 
@@ -129,13 +117,49 @@ public class ViewTrashHandler extends SakaiResourceHandler {
 
             return result;
         }
+    }
 
-        public String getLabel() {
-            return getLabel(root);
+    private class TrashItem extends ResourceItem {
+
+        public TrashItem(ContentResource resource) {
+            super(resource);
         }
 
-        private String getLabel(ContentCollection other) {
-            String label = (String)other.getProperties().get(ResourceProperties.PROP_DISPLAY_NAME);
+        public List<Breadcrumb> getBreadcrumbs() {
+            List<Breadcrumb> crumbs = new ArrayList<>();
+
+            String[] parts = resource.getId().split("/");
+            String path = "";
+            for (String part : parts) {
+                if (part == parts[parts.length - 1]) {
+                    continue;
+                }
+
+                path += part + "/";
+                if (path.equals("/") || path.equals("/group/") || path.equals("/user/")) {
+                    continue;
+                }
+
+
+                try {
+                    ContentCollection collection = contentHostingService.getCollection(path);
+                    crumbs.add(new Breadcrumb(collection.getId(), getLabel(collection)));
+                } catch (IdUnusedException e) {
+                    crumbs.add(new Breadcrumb(path, part));
+                } catch (TypeException e) {
+                    continue;
+                } catch (PermissionException e) {
+                    continue;
+                }
+            }
+
+            crumbs.add(new Breadcrumb(resource.getId(), getLabel()));
+
+            return crumbs;
+        }
+
+        private String getLabel(ContentCollection collection) {
+            String label = (String)collection.getProperties().get(ResourceProperties.PROP_DISPLAY_NAME);
             // FIXME label shouldn't be null, but sometimes it is??
             if (label == null) {
                 return "Error: no label";
@@ -144,51 +168,6 @@ public class ViewTrashHandler extends SakaiResourceHandler {
             }
         }
 
-        public String getSize() {
-            return String.format("%s items", root.getMemberCount());
-        }
-
-        public String getLastModified() {
-            try {
-                long modifiedTime = properties.getTimeProperty(ResourceProperties.PROP_MODIFIED_DATE).getTime();
-                final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, new ResourceLoader().getLocale());
-                final TimeZone tz = TimeService.getLocalTimeZone();
-                df.setTimeZone(tz);
-                return df.format(modifiedTime);
-            } catch (EntityPropertyNotDefinedException e) {
-                return "";
-            } catch (EntityPropertyTypeException e) {
-                return properties.getProperty(ResourceProperties.PROP_MODIFIED_DATE);
-            }
-        }
-
-        public String getOwner() {
-            String userId = properties.getProperty(ResourceProperties.PROP_CREATOR);
-
-            if (userId != null) {
-                try {
-                    return UserDirectoryService.getUser(userId).getDisplayName();
-                } catch (UserNotDefinedException e) {
-                }
-            }
-
-            return "";
-        }
-
-        public String getAccessSummary() {
-            if (AccessMode.GROUPED.equals(root.getAccess())) {
-                return "Select group(s)";
-            } else if (root.getRoleAccessIds().size() > 0) {
-                if (root.getRoleAccessIds().contains(".anon")) {
-                    return "Public";
-                } else {
-                    //return root.getRoleAccessIds().stream().collect(Collectors.joining(", "));
-                    return "Select role(s)";
-                }
-            } else {
-                return "Entire site";
-            }
-        }
     }
 
 }

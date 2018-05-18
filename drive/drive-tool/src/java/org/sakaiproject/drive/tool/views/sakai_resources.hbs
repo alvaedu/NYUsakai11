@@ -72,8 +72,8 @@
           <li>
             <ul class="sakai-resources-tree"></ul>
           </li>
-          <li>
-            <a data-path="/trash" href="{{baseURL}}trash" class="trash-show"><i class="fa fa-trash" aria-hidden="true"></i> Trash</a>
+          <li class="sakai-drive-menu-item {{#if trash}}active{{/if}}">
+            <a data-path="/trash" href="{{baseURL}}trash" class="trash-show"><i class="fa fa-trash" aria-hidden="true"></i> <span class="sakai-drive-menu-item-text">Trash</span></a>
           </li>
         </ul>
       </div>
@@ -94,10 +94,26 @@
             {{#each resource.children}}
               <tr draggable="true">
                 <td class="name">
-                  {{#if folder}}
-                    <div class="drive-folder"><a data-path="{{path}}" href="{{baseURL}}sakai-resources{{path}}">{{label}}</a></div>
+                  {{#if trash}}
+                    <div class="drive-file {{typeClass}}">
+                      <a data-path="{{path}}" href="/access/content{{path}}">
+                        {{#each breadcrumbs}}
+                          <span>
+                            {{#if @last}}
+                              <span class="resource">{{label}}</span>
+                            {{else}}
+                              <span class="collection">{{label}}</span> 
+                            {{/if}}
+                          </span>
+                        {{/each}}
+                      </a>
+                    </div>
                   {{else}}
-                    <div class="drive-file {{typeClass}}"><a data-path="{{path}}" href="/access/content{{path}}">{{label}}</a></div>
+                    {{#if folder}}
+                      <div class="drive-folder"><a data-path="{{path}}" href="{{baseURL}}sakai-resources{{path}}">{{label}}</a></div>
+                    {{else}}
+                      <div class="drive-file {{typeClass}}"><a data-path="{{path}}" href="/access/content{{path}}">{{label}}</a></div>
+                    {{/if}}
                   {{/if}}
                 </td>
                 <td class="access">{{accessSummary}}</td>

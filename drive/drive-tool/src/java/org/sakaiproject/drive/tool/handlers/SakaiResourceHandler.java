@@ -137,9 +137,9 @@ public class SakaiResourceHandler implements Handler {
     }
 
     protected class ResourceTree implements Resource {
-        private ContentCollection root;
-        private ContentHostingService contentHostingService;
-        private ResourceProperties properties;
+        protected ContentCollection root;
+        protected ContentHostingService contentHostingService;
+        protected ResourceProperties properties;
 
         public ResourceTree(ContentCollection root, ContentHostingService contentHostingService) {
             this.root = root;
@@ -181,10 +181,11 @@ public class SakaiResourceHandler implements Handler {
 
             ContentCollection current = root;
 
-            while (current != null && !"/group/".equals(current.getId())) {
+            while (current != null && !"/group/".equals(current.getId()) && !"/user/".equals(current.getId())) {
                 result.add(0, new Breadcrumb(current.getId(), getLabel(current)));
                 current = current.getContainingCollection();
             }
+
             return result;
         }
 
@@ -192,7 +193,7 @@ public class SakaiResourceHandler implements Handler {
             return getLabel(root);
         }
 
-        private String getLabel(ContentCollection other) {
+        protected String getLabel(ContentCollection other) {
             String label = (String)other.getProperties().get(ResourceProperties.PROP_DISPLAY_NAME);
             // FIXME label shouldn't be null, but sometimes it is??
             if (label == null) {
@@ -263,15 +264,14 @@ public class SakaiResourceHandler implements Handler {
     }
 
     protected class ResourceItem implements Resource {
-        private ContentResource resource;
-        private ContentTypeImageService contentTypeImageService;
-        private ResourceProperties properties;
+        protected ContentResource resource;
+        protected ContentTypeImageService contentTypeImageService;
+        protected ResourceProperties properties;
         
         public ResourceItem(ContentResource resource) {
             this.resource = resource;
             this.properties = resource.getProperties();
             this.contentTypeImageService = (ContentTypeImageService) ComponentManager.get("org.sakaiproject.content.api.ContentTypeImageService");
-            
         }
 
         public boolean isFolder() {

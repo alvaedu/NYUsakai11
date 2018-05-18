@@ -206,6 +206,11 @@ body.sakai-drive-preview-open {
 .sakai-resources-table tr.active td.name a {
   color: white;
 }
+.sakai-resources-table.trash .name .collection:after {
+  content: '/';
+  color: #999;
+  padding-left: 5px;
+}
 
 .sakai-resource-dropzone.sakai-resource-dropzone-active {
   outline: 2px solid #347EB2;
@@ -306,4 +311,16 @@ body.sakai-drive-preview-open {
 .sakai-drive-menu {
   padding: 0;
   list-style: none;
+}
+.sakai-drive-menu .sakai-drive-menu-item.active > a {
+  font-weight: bold;
+}
+.sakai-drive-menu .sakai-drive-menu-item a {
+  text-decoration: none;
+}
+.sakai-drive-menu .sakai-drive-menu-item a i.fa {
+  color: #777;
+}
+.sakai-drive-menu .sakai-drive-menu-item a .sakai-drive-menu-item-text {
+  text-decoration: underline;
 }
