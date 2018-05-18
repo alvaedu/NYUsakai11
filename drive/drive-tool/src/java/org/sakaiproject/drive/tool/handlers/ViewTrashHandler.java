@@ -49,6 +49,7 @@ public class ViewTrashHandler extends SakaiResourceHandler {
 
             context.put("resource", new Trash(siteResources, contentHostingService));
             context.put("collectionId", siteResources.getId());
+            context.put("trash", true);
 
             if (inline) {
                 context.put("layout", "false");

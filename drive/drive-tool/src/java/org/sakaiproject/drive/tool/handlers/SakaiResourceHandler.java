@@ -69,7 +69,7 @@ public class SakaiResourceHandler implements Handler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, Map<String, Object> context) {
         String siteId = (String) context.get("siteId");
-        String requestedPath = "/group/" + siteId + "/";
+        String requestedPath = contentHostingService.getSiteCollection(siteId);
 
         if (request.getPathInfo() != null) {
             String[] bits = request.getPathInfo().split("/", 3);

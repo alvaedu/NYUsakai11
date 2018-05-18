@@ -226,7 +226,25 @@ SakaiDrive.prototype.addDroppables = function($droppables) {
 }
 
 
+SakaiDrive.prototype.restoreResource = function(id) {
+    var self = this;
+
+    $.ajax(baseURL + "restore",
+           {
+               type: "POST",
+               data: {
+                   'inline_target_listing': true,
+                   'resource[]': [id],
+               }
+           }).success(function (content, status, xhr) {
+               self.reloadPane(self.baseURL + 'trash');
+           });
+};
+
+
 SakaiDrive.prototype.setupContextMenu = function() {
+    var self = this;
+
     $('.sakai-resources-table tbody tr td').on("contextmenu", function (e) {
         // remove already showing menus
         $('.sakai-drive-context-menu').hide().remove();
@@ -234,6 +252,11 @@ SakaiDrive.prototype.setupContextMenu = function() {
         if (e.ctrlKey) return;
 
         var template = TrimPath.parseTemplate($("#contextMenuTemplate").html().trim().toString());
+
+        if ($(this).closest('.sakai-resources-table').is('.trash')) {
+          template = TrimPath.parseTemplate($("#trashContextMenuTemplate").html().trim().toString());
+        }
+
         var $target = $(e.target);
         var $menu = $(template.process({
           isFolder: $target.closest('tr').find('.drive-folder').length > 0
@@ -251,6 +274,8 @@ SakaiDrive.prototype.setupContextMenu = function() {
 
                 if ($selectedMenu.is('.sakai-drive-context-menu-open')) {
                   $target.closest('tr').find('td.name a')[0].click();
+                } else if ($selectedMenu.is('.sakai-drive-context-menu-restore')) {
+                  self.restoreResource($target.closest('tr').find('td.name a').data('path'));
                 } else {
                   alert('TODO :)');
                 }
